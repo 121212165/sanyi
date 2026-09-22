@@ -1,0 +1,269 @@
+{
+  "request": {
+    "id": "fixture",
+    "rules": "chinese",
+    "komi": 7.5,
+    "boardXSize": 19,
+    "boardYSize": 19,
+    "maxVisits": 200,
+    "moves": [
+      [
+        "B",
+        "J5"
+      ],
+      [
+        "W",
+        "M3"
+      ],
+      [
+        "B",
+        "P1"
+      ],
+      [
+        "W",
+        "S18"
+      ],
+      [
+        "B",
+        "B15"
+      ],
+      [
+        "W",
+        "E13"
+      ],
+      [
+        "B",
+        "H11"
+      ],
+      [
+        "W",
+        "L9"
+      ]
+    ]
+  },
+  "response": {
+    "id": "single-200",
+    "isDuringSearch": false,
+    "moveInfos": [
+      {
+        "edgeVisits": 116,
+        "edgeWeight": 213.972098,
+        "lcb": 0.171500923,
+        "move": "Q4",
+        "order": 0,
+        "playSelectionValue": 213.972098,
+        "prior": 0.465370208,
+        "pv": [
+          "Q4",
+          "C16",
+          "C4",
+          "E16",
+          "J3",
+          "D11",
+          "Q15",
+          "Q17"
+        ],
+        "scoreLead": -3.71441185,
+        "scoreMean": -3.71441185,
+        "scoreSelfplay": -5.5873185,
+        "scoreStdev": 14.4032723,
+        "utility": -0.65379797,
+        "utilityLcb": -0.681706911,
+        "visits": 116,
+        "weight": 213.972098,
+        "winrate": 0.181468402
+      },
+      {
+        "edgeVisits": 27,
+        "edgeWeight": 50.639608,
+        "lcb": 0.137085941,
+        "move": "D16",
+        "order": 1,
+        "playSelectionValue": 21,
+        "prior": 0.232363224,
+        "pv": [
+          "D16",
+          "R4",
+          "P3",
+          "D4",
+          "Q5",
+          "R5"
+        ],
+        "scoreLead": -4.30424992,
+        "scoreMean": -4.30424992,
+        "scoreSelfplay": -6.42782138,
+        "scoreStdev": 14.3009592,
+        "utility": -0.720455644,
+        "utilityLcb": -0.759439495,
+        "visits": 27,
+        "weight": 50.639608,
+        "winrate": 0.151008745
+      },
+      {
+        "edgeVisits": 23,
+        "edgeWeight": 43.4564166,
+        "lcb": 0.139182058,
+        "move": "E16",
+        "order": 2,
+        "playSelectionValue": 14,
+        "prior": 0.137778297,
+        "pv": [
+          "E16",
+          "R4",
+          "P3",
+          "D4",
+          "Q5",
+          "R5"
+        ],
+        "scoreLead": -4.27701565,
+        "scoreMean": -4.27701565,
+        "scoreSelfplay": -6.32162557,
+        "scoreStdev": 14.3396377,
+        "utility": -0.71018379,
+        "utilityLcb": -0.753551587,
+        "visits": 23,
+        "weight": 43.4564166,
+        "winrate": 0.154670557
+      },
+      {
+        "edgeVisits": 22,
+        "edgeWeight": 40.9087089,
+        "lcb": 0.143684273,
+        "move": "D4",
+        "order": 3,
+        "playSelectionValue": 6,
+        "prior": 0.0596059263,
+        "pv": [
+          "D4",
+          "C16",
+          "Q4",
+          "E16",
+          "C11",
+          "J3",
+          "G3"
+        ],
+        "scoreLead": -4.17411953,
+        "scoreMean": -4.17411953,
+        "scoreSelfplay": -6.2078829,
+        "scoreStdev": 14.2390483,
+        "utility": -0.702410087,
+        "utilityLcb": -0.744430284,
+        "visits": 22,
+        "weight": 40.9087089,
+        "winrate": 0.158691486
+      },
+      {
+        "edgeVisits": 6,
+        "edgeWeight": 11.5153912,
+        "lcb": 0.0791067184,
+        "move": "C4",
+        "order": 4,
+        "playSelectionValue": 2,
+        "prior": 0.0254864153,
+        "pv": [
+          "C4",
+          "Q3",
+          "D16"
+        ],
+        "scoreLead": -4.27788676,
+        "scoreMean": -4.27788676,
+        "scoreSelfplay": -6.42512104,
+        "scoreStdev": 14.1728086,
+        "utility": -0.728148626,
+        "utilityLcb": -0.925175481,
+        "visits": 6,
+        "weight": 11.5153912,
+        "winrate": 0.149473452
+      },
+      {
+        "edgeVisits": 3,
+        "edgeWeight": 6.01593539,
+        "lcb": -0.133953421,
+        "move": "P3",
+        "order": 5,
+        "playSelectionValue": 1,
+        "prior": 0.0176608246,
+        "pv": [
+          "P3",
+          "C16",
+          "C4"
+        ],
+        "scoreLead": -4.56673326,
+        "scoreMean": -4.56673326,
+        "scoreSelfplay": -6.93767882,
+        "scoreStdev": 14.2251875,
+        "utility": -0.765764204,
+        "utilityLcb": -1.51480357,
+        "visits": 3,
+        "weight": 6.01593539,
+        "winrate": 0.13356064
+      },
+      {
+        "edgeVisits": 5,
+        "edgeWeight": 9.83018811,
+        "lcb": 0.055710387,
+        "move": "Q3",
+        "order": 6,
+        "playSelectionValue": 0,
+        "prior": 0.0101338373,
+        "pv": [
+          "Q3",
+          "C16",
+          "C4"
+        ],
+        "scoreLead": -4.03378394,
+        "scoreMean": -4.03378394,
+        "scoreSelfplay": -6.20567853,
+        "scoreStdev": 14.1983437,
+        "utility": -0.722368647,
+        "utilityLcb": -1.00495354,
+        "visits": 5,
+        "weight": 9.83018811,
+        "winrate": 0.156633564
+      },
+      {
+        "edgeVisits": 2,
+        "edgeWeight": 3.73565987,
+        "lcb": -0.391507654,
+        "move": "D3",
+        "order": 7,
+        "playSelectionValue": 0,
+        "prior": 0.00877010543,
+        "pv": [
+          "D3",
+          "Q3"
+        ],
+        "scoreLead": -4.59684068,
+        "scoreMean": -4.59684068,
+        "scoreSelfplay": -6.74557281,
+        "scoreStdev": 14.2089298,
+        "utility": -0.735332844,
+        "utilityLcb": -2.2282322,
+        "visits": 2,
+        "weight": 3.73565987,
+        "winrate": 0.141670687
+      }
+    ],
+    "rootInfo": {
+      "currentPlayer": "B",
+      "rawLead": -4.48429871,
+      "rawNoResultProb": 0.00181622396,
+      "rawScoreSelfplay": -6.27437162,
+      "rawScoreSelfplayStdev": 14.0626974,
+      "rawStScoreError": 1.10383713,
+      "rawStWrError": 0.0454005226,
+      "rawVarTimeLeft": 31.472887,
+      "rawWinrate": 0.159546643,
+      "scoreLead": -3.81599886,
+      "scoreSelfplay": -5.72559145,
+      "scoreStdev": 14.3862295,
+      "symHash": "0154FBE58D1603C5343527FCEEDD055F",
+      "thisHash": "5F792305D182EDAFA9C6BB19C2807C99",
+      "utility": -0.664682029,
+      "visits": 205,
+      "weight": 381.40109502629554,
+      "winrate": 0.176452777
+    },
+    "turnNumber": 8
+  }
+}

@@ -1,0 +1,258 @@
+:root {
+  --bg: #14100d;
+  --fg: #ece3d6;
+  --muted: #a3968a;
+  --line: #3a2f26;
+  --accent: #d9a95f;
+  --ok: #35c07a;
+  --bad: #e05b49;
+  --warn: #e8b13a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.5 ui-sans-serif, system-ui, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+code {
+  background: #241d17;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: ui-monospace, Consolas, monospace;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 12px;
+}
+
+.center {
+  max-width: 640px;
+  margin: 12vh auto;
+  padding: 0 20px;
+}
+
+.cta {
+  display: inline-block;
+  margin: 18px 0;
+  padding: 10px 18px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: #1b1613;
+}
+
+footer.bar {
+  border-bottom: 0;
+  border-top: 1px solid var(--line);
+  margin-top: auto;
+}
+
+.bar label {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+button,
+select {
+  background: #241d17;
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+button.adopt {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+.badge {
+  font-size: 12px;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+}
+
+.badge[data-tier='native'] {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.dot.ok { background: var(--ok); }
+.dot.bad { background: var(--bad); }
+.dot.wait { background: var(--warn); animation: blink 1s infinite; }
+
+@keyframes blink { 50% { opacity: 0.25 } }
+
+.disclaimer {
+  margin: 8px 14px 0;
+  font-size: 12px;
+  color: var(--warn);
+  border-left: 3px solid var(--warn);
+  padding-left: 8px;
+}
+
+.board-area {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px minmax(260px, 340px);
+  gap: 14px;
+  padding: 14px;
+  align-items: start;
+}
+
+@media (max-width: 1080px) {
+  .board-area { grid-template-columns: 1fr; }
+}
+
+.goban {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.goban .hit:hover {
+  fill: rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+}
+
+.rail, .panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: #1a1512;
+  max-height: 78vh;
+  overflow: auto;
+}
+
+.rail h3, .panel h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.movelist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  columns: 2;
+  column-gap: 10px;
+  font-size: 12px;
+}
+
+.movelist li {
+  break-inside: avoid;
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.movelist li.sel button {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.movelist button {
+  flex: 1;
+  text-align: left;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+.movelist .ev {
+  color: var(--muted);
+  font-style: normal;
+  font-size: 11px;
+}
+
+.nav {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.cands {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.cands th, .cands td {
+  text-align: right;
+  padding: 3px 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.cands th:first-child, .cands td:first-child {
+  text-align: left;
+}
+
+.pv {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 12px;
+  color: var(--accent);
+  word-break: break-all;
+}
+
+.warn {
+  color: var(--warn);
+  font-size: 12px;
+}
+
+.thinking {
+  color: var(--ok);
+  font-size: 12px;
+}
+
+.notice {
+  color: var(--accent);
+}
+
+.clocks {
+  font-family: ui-monospace, Consolas, monospace;
+}

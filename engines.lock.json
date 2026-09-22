@@ -1,0 +1,33 @@
+{
+  "katago": {
+    "version": "1.18.1",
+    "exe": {
+      "url": "https://github.com/lightvector/KataGo/releases/download/v1.18.1/katago-v1.18.1-eigenavx2-windows-x64.zip",
+      "entry": "katago.exe",
+      "sha256": "0d62ffa41ee04dd89dd1b80fe45e306c837231cb1e2dccb4f5780d0ca7c313db"
+    },
+    "net": {
+      "name": "kata1-b18c384nbt-s9996604416-d4316597426.bin.gz",
+      "url": "https://media.katagotraining.org/uploaded/networks/models/kata1/kata1-b18c384nbt-s9996604416-d4316597426.bin.gz",
+      "sha256": "9d7a6afed8ff5b74894727e156f04f0cd36060a24824892008fbb6e0cba51f1d"
+    }
+  },
+  "katago_opencl": {
+    "version": "1.18.1",
+    "optional": true,
+    "exe": {
+      "url": "https://github.com/lightvector/KataGo/releases/download/v1.18.1/katago-v1.18.1-opencl-windows-x64.zip",
+      "entry": "katago.exe",
+      "sha256": null
+    }
+  },
+  "stockfish": {
+    "version": "17.1",
+    "optional": true,
+    "exe": {
+      "url": "https://github.com/official-stockfish/Stockfish/releases/download/sf_17.1/stockfish-windows-x64-bmi2.zip",
+      "entry": "stockfish-17.1-win-x64-bmi2.exe",
+      "sha256": null
+    }
+  }
+}

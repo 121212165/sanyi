@@ -1,0 +1,14 @@
+2026-09-21 19:22:29+0800: Running with following config:
+logDir = analysis_logs
+maxVisits = 5000
+nnCacheSizePowerOfTwo = 23
+nnMaxBatchSize = 64
+nnMutexPoolSizePowerOfTwo = 17
+nnRandomize = true
+numAnalysisThreads = 1
+numSearchThreadsPerAnalysisThread = 8
+reportAnalysisWinratesAs = BLACK
+
+Uncaught exception: Could not find key 'numSearchThreads' in config file C:\Users\lenovo\Documents\Qoder\2026-09-21\dd0977ae\.local\engines\katago\1.18.1\analysis-katago.cfg
+2026-09-21 19:22:29+0800: Loading model and initializing benchmark...
+2026-09-21 19:22:29+0800: Testing with default positions for board size: 19

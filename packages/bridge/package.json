@@ -1,0 +1,15 @@
+{
+  "name": "@sanyi/bridge",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/main.ts",
+  "dependencies": {
+    "@sanyi/core": "*",
+    "@sanyi/engine": "*",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.1"
+  }
+}

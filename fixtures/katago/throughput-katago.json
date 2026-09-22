@@ -1,0 +1,75 @@
+{
+  "measuredAt": "2026-09-21T12:23:42.920Z",
+  "machine": {
+    "cpu": "Intel(R) Core(TM) Ultra 5 125H",
+    "logicalCores": 18,
+    "totalMemGB": 34
+  },
+  "net": "kata1-b18c384nbt-s9996604416-d4316597426.bin.gz",
+  "searchThreads": 8,
+  "startupSec": 3.2,
+  "singlePosition": [
+    {
+      "maxVisits": 50,
+      "visits": 55,
+      "visitsPerSec": 4.9,
+      "secPerMove": 11.1
+    },
+    {
+      "maxVisits": 200,
+      "visits": 207,
+      "visitsPerSec": 10.8,
+      "secPerMove": 19.2
+    },
+    {
+      "maxVisits": 1000,
+      "visits": 1007,
+      "visitsPerSec": 10.3,
+      "secPerMove": 97.3
+    }
+  ],
+  "ownershipCost": {
+    "without": 34500,
+    "with": 7.8
+  },
+  "reviewBatch": [
+    {
+      "numAnalysisThreads": 1,
+      "positions": 41,
+      "visitsPerPosition": 60,
+      "wallSec": 15.7,
+      "secPerPosition": 0.38,
+      "aggregateVisitsPerSec": 172.9
+    },
+    {
+      "numAnalysisThreads": 2,
+      "positions": 41,
+      "visitsPerPosition": 60,
+      "wallSec": 16.4,
+      "secPerPosition": 0.4,
+      "aggregateVisitsPerSec": 164.6
+    },
+    {
+      "numAnalysisThreads": 4,
+      "positions": 41,
+      "visitsPerPosition": 60,
+      "wallSec": 23.6,
+      "secPerPosition": 0.58,
+      "aggregateVisitsPerSec": 114.6
+    }
+  ],
+  "streaming": {
+    "firstReportMs": 516,
+    "endVisits": 607,
+    "totalMs": 1369
+  },
+  "budgets": {
+    "visitsPerSecSingle": 10.3,
+    "blitzMoveMs": 2000,
+    "blitzMoveVisits": 21,
+    "untimedMoveCapVisits": 206,
+    "reviewSweepVisits": 60,
+    "reviewDeepVisits": 206,
+    "reviewSecondsPerPosition": 0.4
+  }
+}
