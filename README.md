@@ -16,8 +16,8 @@
 | 本机算力实测（CPU 与 Arc 核显两条后端） | ✅ `fixtures/katago/throughput-*.json` |
 | 本地引擎桥（ws + 权威时钟 + 串行调度 + 按实测挑后端） | ✅ `tools/smoke-bridge.ts` 验证 |
 | 网页对局（比赛两档 / 学习模式数据面板） | ✅ 真实浏览器验证：水合、361 落点、点击 D4 引擎应 Q16、无 JS 报错（`tools/browser_check.py`） |
-| 思考链面板的 LLM 讲解 + 提问 | ⛔ 未开始 |
-| AI 复盘 / 自己复盘 | ⛔ 未开始 |
+| 复盘面板（批量分析 + 中文解读 + 证据审计，不接 API） | ✅ 真实浏览器验证：下 6 手→点复盘→出句，20 个证据指针 0 个对不上（`tools/review_e2e.py`） |
+| 提问（对话式追问引擎） | ⛔ 未开始 |
 | 国际象棋 / 中国象棋 | ⛔ 未开始 |
 | 云同步 | ⛔ 未开始 |
 
@@ -44,6 +44,7 @@ npm run bench:katago -- --flavor katago_opencl --threads 6   # 实测核显后�
 npm run bridge                             # 终端 A：ws://127.0.0.1:8788
 npm run web                                # 终端 B：http://localhost:3100/play
 npx tsx tools/smoke-bridge.ts              # 端到端自检：后端选择、真实着法、非法棋谱被拒
+npx tsx tools/review.ts                    # 命令行复盘最近一盘（同一套解读器）
 ```
 
 `fetch-engines.mjs` 只把引擎下到 `.local/`（已 gitignore，不入库）。改引擎版本请同步更新 `engines.lock.json` 里的 `sha256`——脚本会打印未钉住（UNPINNED）的哈希。

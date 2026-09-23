@@ -256,3 +256,24 @@ button.adopt {
 .clocks {
   font-family: ui-monospace, Consolas, monospace;
 }
+
+.tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+.tabs button { flex: 1; }
+.tabs button.on { border-color: var(--accent); color: var(--accent); }
+.reviewbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+.review h4 { margin: 14px 0 6px; font-size: 12px; color: var(--muted); font-weight: 600; }
+.sent { margin: 4px 0; font-size: 13px; line-height: 1.55; }
+.sent.derived { border-left: 2px solid #4b6b8a; padding-left: 7px; }
+.sent.measured { border-left: 2px solid var(--line); padding-left: 7px; }
+.ev {
+  display: inline-block; margin-left: 5px; padding: 0 4px; font-size: 10px;
+  color: #7f8f7f; background: #1e2420; border: 1px solid #2c352c; border-radius: 3px;
+  cursor: help; vertical-align: 1px;
+}
+.mv { margin: 10px 0; padding-top: 6px; border-top: 1px dashed var(--line); }
+.jump { font-size: 12px; width: 100%; text-align: left; }
+.audit { margin-top: 12px; font-size: 12px; }
+.audit.ok { color: var(--ok); }
+.audit.bad { color: var(--bad); font-weight: 600; }
+.limits { margin-top: 12px; font-size: 12px; color: var(--muted); }
+.limits summary { cursor: pointer; }

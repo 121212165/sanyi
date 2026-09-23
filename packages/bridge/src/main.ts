@@ -183,13 +183,49 @@ function baselineFor(prevPos: GoPosition, played: string): Baseline {
 }
 
 function positionFromMoves(moves: string[]) {
+  return replayPositions(moves).at(-1)!;
+}
+
+/** Positions before each ply, plus the final one: positions[i] is the board before move i. */
+function replayPositions(moves: string[]): GoPosition[] {
   let pos = startPosition();
+  const out = [pos];
   for (const m of moves) {
     const r = tryMove(pos, m);
     if (!r.ok || !r.position) throw new Error(`illegal move ${m} at ply ${pos.moves.length}: ${r.reason}`);
     pos = r.position;
+    out.push(pos);
   }
-  return pos;
+  return out;
+}
+
+/**
+ * Whole-game review in ONE engine query. `analyzeTurns` shares a single search tree across the
+ * consecutive positions, which is what makes a 40-ply sweep cost seconds instead of minutes here —
+ * measured 41 positions @60 visits in 7.1s on the OpenCL backend.
+ */
+async function reviewGame(moves: string[], visits: number): Promise<{ ply: number; packet: ReturnType<typeof toPacket> }[]> {
+  const positions = replayPositions(moves);
+  const q = positionToQuery(positions.at(-1)!, {
+    id: `review-${Date.now()}`,
+    maxVisits: visits,
+    analyzeTurns: Array.from({ length: moves.length + 1 }, (_, i) => i),
+  });
+  const responses = await engine().askTurns(q, moves.length + 1);
+  const meta = {
+    backendId: info.id,
+    tier: info.tier,
+    strength: info.strength,
+    engineVersion: info.version,
+    threads: 6,
+  };
+  const out: { ply: number; packet: ReturnType<typeof toPacket> }[] = [];
+  for (const res of responses) {
+    const pos = positions[res.turnNumber];
+    if (!pos) continue;
+    out.push({ ply: res.turnNumber, packet: toPacket(res, pos, meta, { elapsedMs: res.nodeCount ? Math.round(res.nodeCount / 50) : 0 }) });
+  }
+  return out;
 }
 
 async function analyse(moves: string[], budget: Budget, onDelta: (p: Awaited<ReturnType<typeof toPacket>>, final: boolean) => void, adopt?: { stop: () => void }): Promise<void> {
@@ -226,7 +262,7 @@ async function analyse(moves: string[], budget: Budget, onDelta: (p: Awaited<Ret
 
 type Msg = {
   reqId?: string;
-  op: 'capabilities' | 'best' | 'analyze' | 'clockStart' | 'clockMove' | 'clockState' | 'recordStart' | 'recordMove' | 'recordEnd' | 'ping';
+  op: 'capabilities' | 'best' | 'analyze' | 'review' | 'clockStart' | 'clockMove' | 'clockState' | 'recordStart' | 'recordMove' | 'recordEnd' | 'ping';
   game?: 'go';
   moves?: string[];
   budget?: Budget;
@@ -237,6 +273,7 @@ type Msg = {
   userColor?: 'black' | 'white';
   by?: 'user' | 'engine';
   forceEval?: boolean;
+  visits?: number;
   result?: string;
   reason?: string;
 };
@@ -274,6 +311,15 @@ function serve(socket: WebSocket): void {
             await analyse(msg.moves ?? [], msg.budget ?? { kind: 'visits', n: 200 }, (packet, final) =>
               send({ reqId: msg.reqId, packet, final }),
             );
+          } catch (e) {
+            send({ reqId: msg.reqId, error: (e as Error).message });
+          }
+        });
+      case 'review':
+        return void enqueue(async () => {
+          try {
+            const packets = await reviewGame(msg.moves ?? [], msg.visits ?? 120);
+            send({ reqId: msg.reqId, packets });
           } catch (e) {
             send({ reqId: msg.reqId, error: (e as Error).message });
           }

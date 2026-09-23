@@ -93,6 +93,11 @@ export class Bridge {
     return this.rpc({ op: 'analyze', game: 'go', moves, budget });
   }
 
+  /** One batched engine pass over a whole game; shares a single search tree across turns. */
+  review(moves: string[], visits = 120): Promise<{ packets?: { ply: number; packet: AnalysisPacket }[]; error?: string }> {
+    return this.rpc({ op: 'review', game: 'go', moves, visits }, 600_000);
+  }
+
   clockStart(gameId: string, tc: TimeControl, toMove: 'black' | 'white'): Promise<{ clock: ClockState }> {
     return this.rpc({ op: 'clockStart', gameId, tc, toMove });
   }

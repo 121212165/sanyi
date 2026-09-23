@@ -131,10 +131,8 @@ export class KatagoClient {
         return;
       }
       const cb = this.waiters.get(msg.id);
-      if (cb) {
-        if (!msg.isDuringSearch) this.waiters.delete(msg.id);
-        cb(msg);
-      }
+      // The handler owns its own lifetime: an analyzeTurns query expects many responses for one id.
+      if (cb) cb(msg);
     });
     const errl = createInterface({ input: proc.stderr, crlfDelay: Infinity });
     this.ready = new Promise((resolve, reject) => {
@@ -158,6 +156,32 @@ export class KatagoClient {
       });
     });
     return this.ready;
+  }
+
+  /**
+   * One query with `analyzeTurns` produces one response per analyzed turn, all sharing the id.
+   * Collects `expected` of them and returns them ordered by turnNumber.
+   */
+  async askTurns(query: KatagoQuery, expected: number): Promise<KatagoResponse[]> {
+    await this.start();
+    const proc = this.proc;
+    if (!proc) throw new Error('katago not running');
+    return new Promise<KatagoResponse[]>((resolve, reject) => {
+      const got: KatagoResponse[] = [];
+      this.waiters.set(query.id, (r) => {
+        if (r.error) {
+          this.waiters.delete(query.id);
+          return reject(new Error(`${r.error} (field=${r.field})`));
+        }
+        if (r.isDuringSearch) return;
+        got.push(r);
+        if (got.length >= expected) {
+          this.waiters.delete(query.id);
+          resolve(got.sort((a, b) => a.turnNumber - b.turnNumber));
+        }
+      });
+      proc.stdin.write(JSON.stringify(query) + '\n');
+    });
   }
 
   /** Resolves on the final report for this query id; intermediate reports go to `onPartial`. */

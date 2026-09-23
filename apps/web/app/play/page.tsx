@@ -6,8 +6,10 @@ import {
   GameTree,
   formatRemaining,
   goAdapter,
+  positionKey,
   remainingNow,
   scoreArea,
+  startPosition,
   terminal,
   tryMove,
   type AnalysisPacket,
@@ -16,6 +18,7 @@ import {
   type Side,
   type TimeControl,
 } from '@sanyi/core';
+import { audit, buildReview, explain, type AuditResult, type Explanation } from '@sanyi/engine/browser';
 import { GoBoard } from '@/components/GoBoard';
 import { bridge, type Capabilities } from '@/lib/bridge';
 
@@ -27,6 +30,17 @@ const GAME_ID = typeof window === 'undefined' ? 'go' : `go-${Date.now().toString
 
 function nodeMoves(tree: GameTree<GoPosition, string>, id: string): string[] {
   return tree.node(id).position.moves;
+}
+
+/** Position identity for a move prefix — the key the batched review cache is indexed by. */
+function keyOf(moves: string[]): string {
+  let pos = startPosition();
+  for (const m of moves) {
+    const r = tryMove(pos, m);
+    if (!r.ok || !r.position) break;
+    pos = r.position;
+  }
+  return positionKey(pos);
 }
 
 export default function Play() {
@@ -44,6 +58,11 @@ export default function Play() {
   const [engineThinking, setEngineThinking] = useState('');
   const [notice, setNotice] = useState('');
   const [userColor] = useState<Side>('black');
+  const [tab, setTab] = useState<'engine' | 'review'>('engine');
+  const [review, setReview] = useState<Explanation | null>(null);
+  const [reviewAudit, setReviewAudit] = useState<AuditResult | null>(null);
+  const [reviewing, setReviewing] = useState(false);
+  const [reviewErr, setReviewErr] = useState('');
   /** Every user move gets a real engine number, at the cost of one extra search per move. */
   const [recordQuality, setRecordQuality] = useState(true);
   const adoptRef = useRef(false);
@@ -65,6 +84,8 @@ export default function Play() {
   }, [caps]);
 
   const learnVisits = Math.max(100, blitzVisits * 2);
+  /** Review budget per position. 120 is the noise/speed trade-off we measured; raise it for conclusions. */
+  const reviewVisits = Math.max(120, blitzVisits);
 
   useEffect(() => {
     aliveRef.current = true;
@@ -191,6 +212,14 @@ export default function Play() {
     [],
   );
 
+  /** Review rows are keyed by ply along the recorded main line. */
+  const jumpTo = useCallback((ply: number) => {
+    const t = treeRef.current;
+    const line = t.mainLineFrom(t.rootId);
+    const id = line[ply + 1];
+    if (id) setView(id);
+  }, []);
+
   const play = useCallback(
     (vertex: string) => {
       if (phase !== 'user' || !isUserTurn) return;
@@ -230,6 +259,44 @@ export default function Play() {
   }, [mode, runEngine, tc, userColor]);
 
   newGameRef.current = newGame;
+
+  /** One batched engine pass over the finished main line, then deterministic sentences. */
+  const runReview = useCallback(async () => {
+    const moves = treeRef.current.node(cur).position.moves;
+    if (moves.length < 4) {
+      setReviewErr('这盘不足 4 手，复盘没有意义');
+      return;
+    }
+    setReviewing(true);
+    setReviewErr('');
+    setTab('review');
+    try {
+      const r = await bridge.review(moves, reviewVisits);
+      if (r.error || !r.packets) throw new Error(r.error ?? '引擎没有返回复盘数据');
+      const cache = new Map<string, AnalysisPacket>();
+      for (const item of r.packets) cache.set(keyOf(moves.slice(0, item.ply)), item.packet);
+      const analyze = async (ms: string[]): Promise<AnalysisPacket> => {
+        const hit = cache.get(keyOf(ms));
+        if (hit) return hit;
+        // Counterfactual positions are not in the batch, so they get their own search.
+        const a = await bridge.analyze(ms, { kind: 'visits', n: reviewVisits });
+        return a.packet;
+      };
+      const bundle = await buildReview(moves, analyze, {
+        gameId: gameIdRef.current,
+        userColor,
+        mode,
+        engine: caps?.engines[0]?.strength ? { note: caps.engines[0].strength.note, throughput: caps.engines[0].strength.throughput } : undefined,
+      });
+      const ex = explain(bundle, { minPpToShow: 4 });
+      setReviewAudit(audit(ex, bundle));
+      setReview(ex);
+    } catch (e) {
+      setReviewErr((e as Error).message);
+    } finally {
+      setReviewing(false);
+    }
+  }, [caps, cur, mode, reviewVisits, userColor]);
 
   const resign = () => {
     setPhase('over');
@@ -311,39 +378,90 @@ export default function Play() {
         </aside>
 
         <aside className="panel">
-          <h3>引擎数据</h3>
-          {!packet && <p className="muted">（本局面尚无引擎数据）</p>}
-          {packet && (
+          <div className="tabs">
+            <button className={tab === 'engine' ? 'on' : ''} onClick={() => setTab('engine')}>引擎数据</button>
+            <button className={tab === 'review' ? 'on' : ''} onClick={() => setTab('review')}>
+              复盘{reviewing ? '（算中…）' : ''}
+            </button>
+          </div>
+
+          {tab === 'engine' && (
             <>
-              <table className="cands">
-                <thead>
-                  <tr><th>着法</th><th>visits</th><th>胜率</th><th>目差</th></tr>
-                </thead>
-                <tbody>
-                  {packet.candidates.slice(0, 5).map((c) => (
-                    <tr key={c.move}>
-                      <td>{c.label}</td>
-                      <td>{c.visits}</td>
-                      <td>{c.winrate !== undefined ? (c.winrate * 100).toFixed(1) + '%' : '—'}</td>
-                      <td>{c.score.kind === 'points' ? (c.score.lead >= 0 ? '+' : '') + c.score.lead.toFixed(1) : '—'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <p className="muted small">
-                用时 {packet.meta.elapsedMs} ms · {packet.meta.params.visits} visits · 后端 {packet.meta.backendId}
-              </p>
-              {packet.candidates[0]?.pv?.length ? (
-                <p className="pv">主线：{packet.candidates[0].pv.slice(0, 12).join(' ')}</p>
-              ) : null}
-              {packet.insufficiency.length > 0 && (
-                <p className="warn">数据不足：{packet.insufficiency.join(', ')}</p>
+              {!packet && <p className="muted">（本局面尚无引擎数据）</p>}
+              {packet && (
+                <>
+                  <table className="cands">
+                    <thead>
+                      <tr><th>着法</th><th>visits</th><th>胜率</th><th>目差</th></tr>
+                    </thead>
+                    <tbody>
+                      {packet.candidates.slice(0, 5).map((c) => (
+                        <tr key={c.move}>
+                          <td>{c.label}</td>
+                          <td>{c.visits}</td>
+                          <td>{c.winrate !== undefined ? (c.winrate * 100).toFixed(1) + '%' : '—'}</td>
+                          <td>{c.score.kind === 'points' ? (c.score.lead >= 0 ? '+' : '') + c.score.lead.toFixed(1) : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <p className="muted small">
+                    用时 {packet.meta.elapsedMs} ms · {packet.meta.params.visits} visits · 后端 {packet.meta.backendId}
+                  </p>
+                  {packet.candidates[0]?.pv?.length ? (
+                    <p className="pv">主线：{packet.candidates[0].pv.slice(0, 12).join(' ')}</p>
+                  ) : null}
+                  {packet.insufficiency.length > 0 && (
+                    <p className="warn">数据不足：{packet.insufficiency.join(', ')}</p>
+                  )}
+                </>
+              )}
+              {engineThinking && <p className="thinking">{engineThinking}</p>}
+              {packet?.score?.ownershipGrid && (
+                <p className="muted small">棋盘热度 = 引擎归属判断（黑正白负），来自 includeOwnership。</p>
               )}
             </>
           )}
-          {engineThinking && <p className="thinking">{engineThinking}</p>}
-          {packet?.score?.ownershipGrid && (
-            <p className="muted small">棋盘热度 = 引擎归属判断（黑正白负），来自 includeOwnership。</p>
+
+          {tab === 'review' && (
+            <>
+              <div className="reviewbar">
+                <button onClick={runReview} disabled={reviewing}>
+                  {review ? '重新复盘' : '复盘这盘'} · 每点 {reviewVisits} visits
+                </button>
+                {reviewing && <span className="thinking">批量分析中（一次查询共享搜索树）…</span>}
+              </div>
+              {reviewErr && <p className="warn">{reviewErr}</p>}
+              {!review && !reviewing && !reviewErr && (
+                <p className="muted">还没复盘。复盘不接任何外部 API：每句话只引用引擎数字或棋盘规则事实。</p>
+              )}
+              {review && (
+                <div className="review">
+                  <h4>总评</h4>
+                  {review.headline.map((sen, i) => <Sent key={`h${i}`} sen={sen} />)}
+                  <h4>伤你的 {review.moves.length} 手（阈值 4pp）</h4>
+                  {review.moves.length === 0 && <p className="muted">没有超过阈值的着法。</p>}
+                  {review.moves.map((m) => (
+                    <div className="mv" key={m.ply}>
+                      <button className="jump" onClick={() => jumpTo(m.ply)} title="跳到这一手">
+                        第 {m.moveNumber} 手 {m.vertex} · {m.lossPp}pp · {m.severity}
+                      </button>
+                      {m.sentences.map((sen, i) => <Sent key={`${m.ply}-${i}`} sen={sen} />)}
+                    </div>
+                  ))}
+                  <details className="limits">
+                    <summary>这套解读的边界</summary>
+                    {review.limits.map((l, i) => <p key={i} className="muted small">{l}</p>)}
+                  </details>
+                  {reviewAudit && (
+                    <p className={reviewAudit.ok ? 'audit ok' : 'audit bad'}>
+                      审计：{reviewAudit.total} 个证据指针，{reviewAudit.bad.length} 个对不上
+                      {reviewAudit.bad.length > 0 && `（${reviewAudit.bad.slice(0, 3).map((b) => b.path).join(', ')}）`}
+                    </p>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </aside>
       </section>
@@ -365,6 +483,20 @@ export default function Play() {
         )}
       </footer>
     </main>
+  );
+}
+
+/** One sentence plus the field paths it is allowed to cite; a broken pointer greys it out. */
+function Sent({ sen }: { sen: import('@sanyi/engine/browser').Sentence }) {
+  return (
+    <p className={`sent ${sen.provenance}`}>
+      {sen.text}
+      {sen.evidence.map((e) => (
+        <code className="ev" key={e} title={`证据：${e}`}>
+          {e.replace(/^rows\[/, '').replace(/\]/, '')}
+        </code>
+      ))}
+    </p>
   );
 }
 
